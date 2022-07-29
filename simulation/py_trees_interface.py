@@ -5,6 +5,7 @@ import time
 import py_trees as pt
 import simulation.behavior_tree as behavior_tree
 import UI.draw_world as draw_world
+import os
 
 class PyTree(pt.trees.BehaviourTree):
     """
@@ -86,7 +87,7 @@ class PyTree(pt.trees.BehaviourTree):
         #This return is only reached if there are too few up nodes
         return node
 
-    def run_bt(self, max_ticks=200, max_time=10000.0, show_world=False):
+    def run_bt(self, seed, max_ticks=200, max_time=10000.0, show_world=False):
         """
         Function executing the behavior tree
         """
@@ -99,6 +100,12 @@ class PyTree(pt.trees.BehaviourTree):
         if show_world:
             world = draw_world.WorldUI(animate=True)
 
+        executed_traces_path = "executed_traces/"
+        if not os.path.exists(executed_traces_path):
+            os.makedirs(executed_traces_path)
+        file_name = executed_traces_path + "robots_" + str(seed) + ".txt"
+        text_file= open(executed_traces_path + "robots_" + str(seed) + ".txt","w")
+
         start = time.time()
 
         while (self.root.status is not pt.common.Status.FAILURE or straight_fails < max_straight_fails) and \
@@ -110,7 +117,13 @@ class PyTree(pt.trees.BehaviourTree):
             if status_ok:
                 if self.verbose:
                     print("Tick", ticks)
-                self.root.tick_once()
+                
+                text_file= open(file_name,"a")
+                text_file.write(str(self.world_interface.state))
+                text_file.write("\n")  
+                text_file.close()
+
+                self.root.tick_once(file_name)
                 self.world_interface.send_references()
 
                 if show_world:

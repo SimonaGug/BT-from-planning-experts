@@ -26,10 +26,12 @@ class Environment():
             world_interface=self.world_interface, verbose=self.verbose)
 
         # run the Behavior Tree
-        ticks, _ = self.pytree.run_bt(max_ticks=max_ticks, show_world=show_world)
+        print("seed " + str(seed))
+        ticks, _ = self.pytree.run_bt(max_ticks=max_ticks, show_world=show_world, seed=seed)
 
-        return fitness_function.compute_fitness(self.world_interface, self.pytree, ticks, self.fitness_coeff)
-
+        #return 0.0
+        return fitness_function.compute_fitness(self.world_interface, self.pytree, ticks, self.fitness_coeff, False)
+        
     def step(self, individual, show_world=False):
         """ Run the simulation and return the fitness """
         if self.world_interface is None:

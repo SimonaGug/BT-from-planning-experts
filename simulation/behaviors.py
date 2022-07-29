@@ -15,7 +15,9 @@ def get_node_from_string(string, world_interface, verbose=False):
     """
     has_children = False
 
-    if 'at station ' in string:
+    if 'not at station ' in string:
+        node = NotAtStation(string, world_interface, string[15:])
+    elif 'at station ' in string:
         node = AtStation(string, world_interface, string[11:])
     elif 'battery level ' in string:
         node = BatteryLevel(string, world_interface, re.findall(r'\d+', string))
@@ -29,6 +31,7 @@ def get_node_from_string(string, world_interface, verbose=False):
         node = ConveyorLight(string, world_interface, re.findall(r'\d+', string))
     elif 'conveyor heavy ' in string:
         node = ConveyorHeavy(string, world_interface, re.findall(r'\d+', string))
+
 
     elif 'idle' in string:
         node = Idle(string, world_interface, verbose)
@@ -72,6 +75,14 @@ def is_lower_than(string):
         return True
     return False
 
+def is_lower_equal_than(string):
+    """
+    Returns true if string contains '<', false otherwise
+    """
+    if '<=' in string:
+        return True
+    return False
+
 class AtStation(pt.behaviour.Behaviour):
     """
     Check if robot is at given station
@@ -86,20 +97,34 @@ class AtStation(pt.behaviour.Behaviour):
             return pt.common.Status.SUCCESS
         return pt.common.Status.FAILURE
 
+class NotAtStation(pt.behaviour.Behaviour):
+    """
+    Check if robot is at given station
+    """
+    def __init__(self, name, world_interface, station):
+        self.world_interface = world_interface
+        self.station = sm.get_station_from_string(station)
+        super(NotAtStation, self).__init__(name)
+
+    def update(self):
+        if self.world_interface.not_at_station(self.station):
+            return pt.common.Status.SUCCESS
+        return pt.common.Status.FAILURE
+
 class ComparisonCondition(pt.behaviour.Behaviour):
     """
     Class template for conditions comparing against constants
     """
     def __init__(self, name, world_interface, value):
         self.world_interface = world_interface
-        self.lower = is_lower_than(name)
+        self.lower_equal = is_lower_equal_than(name)
         self.value = int(value[0])
         super(ComparisonCondition, self).__init__(name)
 
     def compare(self, variable):
         """ Compares input variable to stored value """
-        if (not self.lower and variable > self.value) or \
-           (self.lower and variable < self.value):
+        if (not self.lower_equal and variable > self.value) or \
+           (self.lower_equal and variable <= self.value):
             return pt.common.Status.SUCCESS
         return pt.common.Status.FAILURE
 
