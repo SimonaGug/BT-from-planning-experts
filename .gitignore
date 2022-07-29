@@ -156,5 +156,6 @@ main.py
 *.coverage
 *.pyperf
 *.mp4
+*.txt
 __pycache__
 TestResults
