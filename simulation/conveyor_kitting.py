@@ -69,9 +69,9 @@ def get_pos(station):
     """
     Returns pose of given station
     """
-    if station == Stations.CHARGE1:
-        return Pos(2, 7.5)
     if station == Stations.CHARGE2:
+        return Pos(2, 7.5)
+    if station == Stations.CHARGE1:
         return Pos(23, 12)
     if station == Stations.CONVEYOR_HEAVY:
         return Pos(12, 12)
