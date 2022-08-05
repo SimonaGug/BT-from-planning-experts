@@ -533,17 +533,12 @@ def remove_folder_if_exists(folder_name, working_directory=None):
 
 #  MAIN   #
 
-col_names = ['at station OTHER', 'at station CONVEYOR_LIGHT', 'at station CHARGE1', 'at station CONVEYOR_HEAVY', 'at station DELIVERY', 'battery level', 'carried weight', 'carried light', 'carried heavy', 'conveyor light', 'conveyor heavy', 'label']
-
 # load dataset
-pima = pd.read_csv("ExecutedTraces-hotencoded.csv", header=None, names=col_names)
+traces = pd.read_csv("ExecutedTracesOneHot.csv", header=0)
 
 #split dataset in features and target variable
-feature_cols = ['at station OTHER', 'at station CONVEYOR_LIGHT', 'at station CHARGE1', 'at station CONVEYOR_HEAVY', 'at station DELIVERY', 'battery level', 'carried weight', 'carried light', 'carried heavy', 'conveyor light', 'conveyor heavy']
-
-
-X = pima[feature_cols] # Features
-y = pima.label # Target variable
+X = traces.iloc[:,:-1]
+y = traces.Decision # Target variable
 
 # Split dataset into training set and test set
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1) # 70% training and 30% test
