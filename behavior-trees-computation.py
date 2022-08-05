@@ -131,6 +131,7 @@ my_bt =   [ 's(', 'f(', 'not at station DELIVERY','battery level <= 10','carried
  'f(', 'battery level > 99','not at station CHARGE1','charge!', ')',
 'idle!', ]
 
+
 my_bt_dnf = ['p(', 's(', 'at station CHARGE1','battery level <= 99','charge!', ')', 
  's(', 'conveyor light <= 0','conveyor heavy <= 1', 'f(', 'battery level > 99', 's(', 'battery level > 10','carried weight <= 6', 'f(', 'at station OTHER','at station CONVEYOR_LIGHT','at station DELIVERY',')',')',')','idle!', ')',
  's(', 'battery level <= 10', 'f(', 'at station CONVEYOR_HEAVY','at station OTHER','at station CONVEYOR_LIGHT','at station DELIVERY',')','move to CHARGE1!', ')',
@@ -140,6 +141,8 @@ my_bt_dnf = ['p(', 's(', 'at station CHARGE1','battery level <= 99','charge!', '
  's(', 'battery level > 10','carried weight <= 6', 'f(', 'at station CONVEYOR_HEAVY', 's(', 'at station CONVEYOR_LIGHT','conveyor light > 0',')',')','pick!', ')',
  's(', 'at station DELIVERY','battery level > 10','carried weight > 6','place!', ')',
  ]
+
+
 
 original_bt = ['s(',
                   'f(','s(', 'at station CHARGE1?', 'charge!',')',
@@ -156,53 +159,53 @@ original_bt = ['s(',
 
 with open("results/performances.csv", "a", encoding='UTF8', newline='') as csvFile:
 
-    header = ["seed","fitness original","fitness BT-Factor", "fitness BT-Factor (dnf)", "fitness RE-BT", "BT-Factor: delta fitness" , "BT-Factor (DNF) delta fitness" ,"RE:BT: delta fitness", "Possible to improve?"]
+    header = ["seed","fitness original","fitness BT-Factor", "fitness BT-Factor (dnf)", "fitness RE-BT", "BT-Factor: delta fitness" , "BT-Factor (DNF) delta fitness" ,"RE:BT: delta fitness", "Possible to minimize?", "Is the robot stuck?"]
     performance = csv.writer(csvFile)
     #performance.writerow(header)
 
-    for j in range (173,175):
-        seed_path = "results/seed" + str(j)
-        path_re_bt=  seed_path + "/re-bt"
-        if not os.path.exists(path_re_bt):
-            os.makedirs(path_re_bt)
-        path_new_method= seed_path + "/my_method"
-        if not os.path.exists(path_new_method):
-            os.makedirs(path_new_method)
-        path_original= seed_path + "/original"
-        if not os.path.exists(path_original):
-            os.makedirs(path_original)
-        path_new_method_dnf= seed_path + "/my_method_dnf"
-        if not os.path.exists(path_new_method_dnf):
-            os.makedirs(path_new_method_dnf)
+    for j in range (175,177):
+        #seed_path = "results/seed" + str(j)
+        #path_re_bt=  seed_path + "/re-bt"
+        #if not os.path.exists(path_re_bt):
+        #    os.makedirs(path_re_bt)
+        #path_new_method= seed_path + "/my_method"
+        #if not os.path.exists(path_new_method):
+        #    os.makedirs(path_new_method)
+        #path_original= seed_path + "/original"
+        #if not os.path.exists(path_original):
+        #    os.makedirs(path_original)
+        #path_new_method_dnf= seed_path + "/my_method_dnf"
+        #if not os.path.exists(path_new_method_dnf):
+        #    os.makedirs(path_new_method_dnf)
         
         environment = notebook_interface.Environment(seed=j, verbose=False)
 
 
-        environment.plot_individual(path_original, 'behavior_tree', original_bt)
+        #environment.plot_individual(path_original, 'behavior_tree', original_bt)
         fitness_original_bt, delivered_heavy_original_bt, delivered_light_original_bt = environment.get_fitness(original_bt, max_ticks=200, show_world=True, seed=environment.seed) 
-        output= open(seed_path + "/output.txt","w+")
-        output.write("Results for seed %d\r\n" % j)
-        output.write("\nOriginal method\n\n\nFitness %d\r" % fitness_original_bt)
-        output.write("delivered_heavy %d\r" % delivered_heavy_original_bt)
-        output.write("delivered_light %d\r" % delivered_light_original_bt)
+        #output= open(seed_path + "/output.txt","w+")
+        #output.write("Results for seed %d\r\n" % j)
+        #output.write("\nOriginal method\n\n\nFitness %d\r" % fitness_original_bt)
+        #output.write("delivered_heavy %d\r" % delivered_heavy_original_bt)
+        #output.write("delivered_light %d\r" % delivered_light_original_bt)
 
-        environment.plot_individual(path_new_method, 'behavior_tree', my_bt)
+        #environment.plot_individual(path_new_method, 'behavior_tree', my_bt)
         fitness_my_bt, delivered_heavy_my_bt, delivered_light_my_bt = environment.get_fitness(my_bt, max_ticks=200, show_world=True, seed=environment.seed) 
-        output.write("\n\n\nMy method\n\n\nFitness %d\r" % fitness_my_bt)
-        output.write("delivered_heavy %d\r" % delivered_heavy_my_bt)
-        output.write("delivered_light %d\r" % delivered_light_my_bt)
+        #output.write("\n\n\nMy method\n\n\nFitness %d\r" % fitness_my_bt)
+        #output.write("delivered_heavy %d\r" % delivered_heavy_my_bt)
+        #output.write("delivered_light %d\r" % delivered_light_my_bt)
 
-        environment.plot_individual(path_new_method_dnf, 'behavior_tree', my_bt_dnf)
+        #environment.plot_individual(path_new_method_dnf, 'behavior_tree', my_bt_dnf)
         fitness_my_bt_dnf, delivered_heavy_my_bt_dnf, delivered_light_my_bt_dnf = environment.get_fitness(my_bt_dnf, max_ticks=200, show_world=True, seed=environment.seed) 
-        output.write("\n\n\nMy method\n\n\nFitness %d\r" % fitness_my_bt_dnf)
-        output.write("delivered_heavy %d\r" % delivered_heavy_my_bt_dnf)
-        output.write("delivered_light %d\r" % delivered_light_my_bt_dnf)
+        #output.write("\n\n\nMy method\n\n\nFitness %d\r" % fitness_my_bt_dnf)
+        #output.write("delivered_heavy %d\r" % delivered_heavy_my_bt_dnf)
+        #output.write("delivered_light %d\r" % delivered_light_my_bt_dnf)
 
 
         
         i=0
         re_bt = individuals[0]
-        environment.plot_individual(path_re_bt, 'behavior_tree', re_bt)
+        #environment.plot_individual(path_re_bt, 'behavior_tree', re_bt)
         print("Alpha = ", alphas[0])
         fitness_re_bt, delivered_heavy_re_bt, delivered_light_re_bt = environment.get_fitness(re_bt, max_ticks=200, show_world=True, seed=environment.seed) 
         previous_fitness_re_bt = fitness_re_bt  
@@ -210,7 +213,7 @@ with open("results/performances.csv", "a", encoding='UTF8', newline='') as csvFi
             i+=1
             re_bt = individuals[i]
             environment = notebook_interface.Environment(seed=j, verbose=False)
-            environment.plot_individual(path_re_bt, 'behavior_tree', re_bt)
+            #environment.plot_individual(path_re_bt, 'behavior_tree', re_bt)
             print("Alpha = ", alphas[i])
             previous_fitness_re_bt = fitness_re_bt
             previous_delivered_heavy_re_bt = delivered_heavy_re_bt
@@ -218,14 +221,19 @@ with open("results/performances.csv", "a", encoding='UTF8', newline='') as csvFi
             fitness_re_bt, delivered_heavy_re_bt, delivered_light_re_bt = environment.get_fitness(re_bt, max_ticks=200, show_world=True, seed=environment.seed)        
             print("Fitness:", fitness_re_bt)
             print("Previous Fitness:", previous_fitness_re_bt)
-            output.write("\n\n\nRE-BT method\n\n\nFitness %d\r" % previous_fitness_re_bt)
-            output.write("delivered_heavy %d\r" % previous_delivered_heavy_re_bt)
-            output.write("delivered_light %d\r" % previous_delivered_light_re_bt)
-            output.write("Best alpha is %s\r" % (alphas[i-1]))
-            output.write("best bt is %s\r\n" % (individuals[i-1]))
+            #output.write("\n\n\nRE-BT method\n\n\nFitness %d\r" % previous_fitness_re_bt)
+            #output.write("delivered_heavy %d\r" % previous_delivered_heavy_re_bt)
+            #output.write("delivered_light %d\r" % previous_delivered_light_re_bt)
+            #output.write("Best alpha is %s\r" % (alphas[i-1]))
+            #output.write("best bt is %s\r\n" % (individuals[i-1]))
+        
+        #check if the robot gets stuck
+        if fitness_original_bt != previous_fitness_re_bt:
+            environment = notebook_interface.Environment(seed=j, verbose=False)
+            #environment.plot_individual(path_re_bt, 'behavior_tree', individuals[i-1])
 
             
-        output.close()
+        #output.close()
             
         performance.writerow([j,fitness_original_bt, fitness_my_bt, fitness_my_bt_dnf, previous_fitness_re_bt, abs(fitness_original_bt-fitness_my_bt), abs(fitness_original_bt-fitness_my_bt_dnf), abs(fitness_original_bt-previous_fitness_re_bt), possible_to_improve[i-1]])
 
