@@ -1,4 +1,3 @@
-from pydoc import classname
 import pandas as pd
 import os
 from sklearn.tree import DecisionTreeClassifier # Import Decision Tree Classifier
@@ -292,54 +291,37 @@ def espresso_minimazer(Rules):
         rule_dnfs.append(str(fm))
     return rule_dnfs
 
-def convert_expr_into_logic(rules, verbose = 0):
+def convert_expr_into_logic(rules):
     logic_minimized_rules= []
     for rule in rules:
         logic_rule=""
         rule=str(rule)
         logic_rule=sympify(str(rule))
-        if verbose >0:
-            print("Rule without action", rule)
-            print("Logic rule", logic_rule)
         logic_minimized_rules.append(logic_rule)  
     return logic_minimized_rules
-
-# convert logic rules into algebraic expressions 
                 
 def upper_repl(match):
      return match.group(1).upper()
 
-def convert_logic_expr_into_algebraic_expr(logic_expressions, verbose = 0 ):
+def convert_logic_expr_into_algebraic_expr(logic_expressions):
     algebraic_expressions = []
     for expr in logic_expressions:
         expr = str(expr)
-        if verbose >0:
-            print("\nBefore", expr)
         expr = expr.replace("|", "+").replace(" & ", "*")
         expr = re.sub(r'~([a-z])', upper_repl, expr)
-        if verbose >0:
-            print("After", expr)
         algebraic_expressions.append(expr)  
-    if verbose >0:
-        print("\n\n Algebraic Rules\n",algebraic_expressions)
     return algebraic_expressions
 
-def convert_logic_rules_into_algebraic_expression_(horn_rules, verbose = 0):
+def convert_logic_rules_into_algebraic_expression_(horn_rules):
     logic_horn_rules= []
     actions_in_order = []
     for rule in horn_rules:
         logic_rule=""
         rule=str(rule)
-        if verbose >0:
-            print("\nOriginal rule", rule)
         rule_without_action = re.sub(r'[A-Z], ', '', rule)
         rule_without_action = re.sub(r', [A-Z]\)', ')', rule_without_action)
         action = "".join(set(rule.replace("VAR", "")).difference(set(rule_without_action.replace("VAR", ""))))
         logic_rule=sympify(str(rule_without_action))
-        if verbose >0:
-            #print("Rule without action", rule_without_action)
-            print("Logic rule", logic_rule)
-            print("Only the action", action)
         actions_in_order.append(action)
         logic_horn_rules.append(logic_rule)  
     return logic_horn_rules,actions_in_order
@@ -348,82 +330,55 @@ def convert_logic_rules_into_algebraic_expression_(horn_rules, verbose = 0):
 ####################################################
 # factorization
 
-def gfactor(f, verbose = 0):
-    if verbose == 1:
-        print("\nCalling g factor on ", f)
-    d = divisor(f, verbose)
+def gfactor(f):
+    d = divisor(f)
     if d == "0":
         return f   
-    q, r = divide(f,d, verbose)
-
-    #if q has only one term
+    q, r = divide(f,d)
     if q[0] == 1:
-        if verbose == 1:
-            print("Q has only one term so I return ", f)
         return f
-    # added by me
     if len(str(q[0])) == 1:
         return lf(f, q[0])   
     else:
-        q = make_cube_free(q[0], verbose)
-        d,r =  divide(f,q, verbose)
-        if verbose == 1 :
-            print("Is the result of the division", d, " cube free?", cube_free(d[0]))
+        q = make_cube_free(q[0])
+        d,r =  divide(f,q)
         if cube_free(d[0]):
-            #added by me
             if "1" not in q:
-                q = gfactor(q, verbose)
-            #if d!=1:
-            d = gfactor(d[0], verbose)
-            #added by me (but it should work even without)
+                q = gfactor(q)
+            d = gfactor(d[0])
             if (r != 0):
-                r = gfactor(r, verbose)
+                r = gfactor(r)
             return sympify(q, locals=v_dict)*sympify(d, locals=v_dict) + sympify(r, locals=v_dict)
         else:
-            c = common_cube(d, verbose)
-            return lf(f,c, verbose)
+            c = common_cube(d)
+            return lf(f,c)
     
-def lf(f, c, verbose = 0):
-    if verbose == 1:
-        print("\nCalling lf on f = ", f, "with c=", c)
-    l = best_literal (f,c, verbose)  
-    q, r = divide (f,l, verbose)
-    c = common_cube(q, verbose)
-    q = gfactor(q[0], verbose)
-    #added by me (but it should work even without)
+def lf(f, c):
+    #l = best_literal (f,c)  
+    #q, r = divide (f,l)
+    l= str(c).replace("[","").replace("]","")
+    q, r = divide (f,l)
+    #c = common_cube(q)
+    q = gfactor(q[0])
     if (r != 0):
-        r = gfactor(r, verbose)
+        r = gfactor(r)
+    #return sympify(l, locals=v_dict)*q + r
     return sympify(l, locals=v_dict)*q + r
 
-def common_cube(f, verbose = 0):
- 
- #returns the largest common cube of Q
-    if verbose == 1:
-        print("Finding the common cube of function ", f)
-    # one addedum
+def common_cube(f):
+    #if single cube
     if "+" not in str(f):
-        if verbose == 1:
-            print(f, " is single cube")
         return f
     cubes =  str(f).replace(" + ","+").replace("[","").replace("]","").split("+")
     c1 = cubes[0]
     c1_var = c1.split("*")
-    if verbose == 1:
-        print("The cubes in f are: ", cubes)
     common_chars_list = []
     for c in range(1, len(cubes)):
-        #print(cubes[c])
         common_chars = ''.join([i for i in c1_var if re.search(i, cubes[c])])
         common_chars_list.append(common_chars)
         if common_chars == [""]:
-            if verbose == 1:
-                print("There is no common cube")
             return ""
-    if verbose == 1:
-        print("The common cube is", common_chars)
     if len(common_chars) == 0:
-        if verbose == 1:
-            print("There is no common cube")
         return ""
     elif len(common_chars) == 1:
         common_var = common_chars[0]
@@ -434,29 +389,19 @@ def common_cube(f, verbose = 0):
             set(common_chars[i]), key = s1.index)) 
             s1= common_var
     if common_var == "":
-            if verbose == 1:
-                print("There is no common cube")
             return ""
     common_cube= sympify(common_var, locals=v_dict) 
     return common_cube
 
 
-def make_cube_free(f, verbose = 0):
-    if verbose == 1:
-        print("Making cube free function f =  ", f)
+def make_cube_free(f):
     if cube_free(f):
-        if verbose == 1:
-            print(f, " is already cube free")
         return str(f)
     cube = common_cube(f)
     if str(cube) != "":
         f_cube_free, remainder = divide(f, str(cube))
-        if verbose == 1:
-            print(f, "cube free is ",f_cube_free)
         return str(f_cube_free).replace("[","").replace("]","")
     else:
-        if verbose ==1:
-            print(f, " is already cube free")
         return str(f)
     
 
@@ -471,22 +416,18 @@ def cube_free(f):
             return False
     return True
 
-def divide(f, d, verbose=0):
+def divide(f, d):
     q, r = reduced(f, [d])
     #Needed for a bug in the sympy library
     r = str(r)
-    if verbose == 1:
-        print("Dividing", f, "with \"", d, "\" the result is\n ", q, "remainder = ", r)
     if "-" in r:
         q= [0]
         r= f
-        if verbose == 1:
-             print("The remainder is negative. Therefore q is\n ", q, "remainder = ", r)
         return q,r
     r = sympify (r, locals=v_dict)
     return q,r
 
-def divisor(f, verbose =0):
+def divisor(f):
     frequencies = {}
     f_str = str(f).replace(" ","").replace("+","*")
     keys = f_str.split("*")
@@ -494,23 +435,21 @@ def divisor(f, verbose =0):
     for i in keys:
         frequencies[i] = frequencies.get(i, 0) + 1
     most_common_literal = max(frequencies, key=frequencies.get)
-    if verbose == 1:
-        print("The divisor (maximum value) is :",most_common_literal)
     if frequencies[most_common_literal]>1:
         return most_common_literal
     else:
         return "0"
 
-def best_literal(f,c, verbose = 0):
-    frequencies = {}
+def best_literal(f,c):
+    frequencies = dict()
     f_str = str(f).replace(" ","").replace("+","*")
     keys = f_str.split("*")
-    frequencies = dict()
+    c_var = str(c).split("*") 
     for i in keys:
-        frequencies[i] = frequencies.get(i, 0) + 1
-    best_literal = max(frequencies, key=frequencies.get)
-    if verbose == 1:
-        print("Best literal among", frequencies, "is: ",best_literal)
+        for j in c_var:
+            if i in j:
+                frequencies[j] = frequencies.get(j, 0) + 1
+    best_literal = str(max(frequencies, key=frequencies.get)).replace("[","").replace("]","")
     return best_literal
 
 #end factorization
@@ -659,7 +598,6 @@ ccp_alpha_list_copy = [0.0 , 0.0008702702702702704 , 0.002275761475761476 , 0.00
 
 
 for ccp_alpha in ccp_alpha_list_copy:
-    #print("\n ccp alpha = ", ccp_alpha)
     cur_prune_num["val"] = i
     if ccp_alpha < 0:  # bug in sklearn I think
         ccp_alpha *= -1
@@ -696,8 +634,8 @@ for ccp_alpha in ccp_alpha_list_copy:
         actions = list(action_to_pstring.keys())
         Variables = {value:key for key, value in sym_lookup.items()}
         minimized_expression = espresso_minimazer(logic_expression)
-        minimized_logic_expression = convert_expr_into_logic(minimized_expression, 0)
-        alg_rules= convert_logic_expr_into_algebraic_expr(minimized_logic_expression , 0)
+        minimized_logic_expression = convert_expr_into_logic(minimized_expression)
+        alg_rules= convert_logic_expr_into_algebraic_expr(minimized_logic_expression)
 
         rules = []
         factorized_rules = []
@@ -734,7 +672,7 @@ with open('RE-BT-Espresso-Output.txt', 'w') as f:
 
 
 
-#save as a dot file, not needed as I have it already in the re-bt-espresso-dot-files folder?
+#save as a dot file, not really needed as I have it already in the re-bt-espresso-dot-files folder?
 print(BTs_RE_BT_method[0])
 bt_re_espresso = BTs_RE_BT_method[0].replace(' \n', '').replace("[ ", "").replace(",]", "").replace("'", "").replace(", ", ",").split(",")
 print(bt_re_espresso)
