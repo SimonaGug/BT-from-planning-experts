@@ -159,3 +159,7 @@ main.py
 *.txt
 __pycache__
 TestResults
+
+#created folders
+*results/
+*RE-BT-Espresso-dot-files/
