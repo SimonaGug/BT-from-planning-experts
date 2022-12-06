@@ -60,4 +60,7 @@ def compute_fitness(world_interface, behavior_tree, ticks, coeff=None, verbose=F
         if verbose:
             print("Timed out: ", fitness)
 
-    return fitness, int(world_interface.state.delivered_heavy), int(world_interface.state.delivered_light)
+    bettery_is_zero = False
+    if world_interface.state.battery_level == 0 and (world_interface.state.robot_pos.x != 23.0 or world_interface.state.robot_pos.y !=12.0):
+        bettery_is_zero = True
+    return fitness, int(world_interface.state.delivered_heavy), int(world_interface.state.delivered_light), bettery_is_zero, 

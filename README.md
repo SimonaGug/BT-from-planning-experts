@@ -1,101 +1,60 @@
-# WASP-CBSS-BT
+# Learning Behavior Trees from Planning Experts Using Data Mining and Logic Factorization
 
-## Objective
-Your goal in this exercise is to construct a Behavior Tree (BT) that controls a mobile robot transferring objects from two conveyors to a delivery table. The two conveyors hold two different items. The top conveyor holds heavy objects which give a higher reward but due to their weight, the robot cannot carry as many. The bottom conveyor holds lighter objects. The robot also has a battery that needs to be recharged repeatedly. If the robot runs out of battery, it will no longer be able to move and no more objects can be transported. The behavior tree needs to find the best trade-off and decide when to perform each action.
-![image](https://github.com/jstyrud/WASP-CBSS-BT/blob/main/environment.png)
+This README will guide you to generate the results presented in the paper _Learning Behavior Trees from Planning Experts Using Data Mining and Logic Factorization_ submitted at AAAI23. This repository is the so called SETUPI in the paper
+## Install
+1. Install python3.8 and R
+2. Install [GraphViz](https://graphviz.org/download/) 
+3. (Optional) create a  python3 [virtual environment](https://docs.python.org/3/library/venv.html) and activate it
+4. Install packages in python
+      ```pip install pydot pyyaml matplotlib celluloid sympy wheel pandas sklearn graphviz networkx pyeda```
+      If you have troubles installing pyeda in windows, we provide the wheel file. Run the command
+      ```pip install pyeda-0.28.0-cp38-cp38-win_amd64.whl```
+      If you want to visualize the tree (more instruction later) run 
+      ```pip install IPython ```
+5. Install packages in R
+      ``` install.packages('C50')```
+      Check the settings and change them so the output will be saved in the top level directory
 
-## Setup the Environment and complete the challenge!
-Go to https://github.com/jstyrud/WASP-CBSS-BT for all source code necessary. All you need to do is load the `runme.ipynb` [notebook](https://github.com/jstyrud/WASP-CBSS-BT/blob/main/runme.ipynb) and run it in some environment of your choice, we suggest [Colaboratory](https://colab.research.google.com/). Every other environment running the notebook is also fine but it might require some more preparation steps we do not provide instructions nor support for. Note that to run Colab you need to have a Google account.
+## Reproducing the results for Correctness and Performance
 
-In order to setup the notebook in Colab, first open a [new project](https://colab.research.google.com/notebooks/intro.ipynb?utm_source=scs-index) which will look like the image below.
-![image](https://github.com/jstyrud/WASP-CBSS-BT/blob/main/colab1.png)
+Open a terminal in the top level directory. Note that these steps are sequential and they need to be run in order. If you would like to skip one step, in the ```output``` folder we provide the files (created during the steps) that are needed to run the following steps. Copy paste the file in the right directory and run the next step
 
-Then, to open the `runme.ipynb` notebook, on the top-left toolbar, go to `File`, then `Open Notebook`. This will prompt a window, where you need to select `GitHub` and paste the link to this repository. Colab will automatically recognise the notebook, that you can select to open.
-![image](https://github.com/jstyrud/WASP-CBSS-BT/blob/main/colab2.png)
+0. (Optional) If you want to visualize the manually defined initial BT run the notebook ```show_BT.ipynb ```
+This notebook can be used to easily visualize any BT given its definition (string).
 
-Once the notebook is loaded, you have to connect it to your PC resources. You do so by pressing the `Connect` button on the top-right corner.
+1. To create the simulation data copy paste in the terminal:
+      ```python run_simulations.py```
+_Expected output_: ```ExecutedTraces.csv``` in the top level directory
 
-You will construct the Behavior Trees as string inputs, but in the notebook are functions to show them graphically and to show animations of episodes of the robot being controlled by the behavior tree.  
-An example of a string representation of a BT is (the string symbols are defined in section [Available Behaiviors](#available-behaviors)):
-```bash
-individual = ['s(', 'f(', 'carried weight < 5?', \
-                          's(', 'move to CHARGE1', 'charge!', ')', ')', \
-                    'f(', 'conveyor light < 1?', 's(', 'move to CONVEYOR_LIGHT!', 'idle!', ')']
-```
-which represents the following BT:
+2. To learn the rules run the script ```c50.R``` in R
+_Expected output_: ```c50-rules.txt``` in the top level directory
 
-![image](https://github.com/jstyrud/WASP-CBSS-BT/blob/main/BT_example.png)
+3. 1. To convert the rules into the BT using BT-Factor copy paste in the terminal:
+      ```python BT-Factor.py```
+_Expected output_: BTFactor folder in the top level directory with 3 ```behavior_tree``` files (```.dot```, ```.png```, ```.svg```) and the ```BT.py``` file. The BT (string form) will be printed in the terminal
 
-The code for the simulation is all available on github and you may look at it or manipulate it locally for your own purposes, for example running some learning or search algorithm. When evaluating your behavior tree however, we will be doing it with the original code, only using your string representation of the behavior tree.
+   2. To convert the rules into the BT using BT-Factor without Horn Clauses change the ```defaul_action_and_horn_clauses``` variable (defined at line 19 of ```BT-Factor.py```) to ```False```, save and copy paste in the terminal: 
+      ```python BT-Factor.py```
+   _Expected output_: BTFactor_DNF folder in the top level directory with 3 ```behavior_tree``` files (```.dot```, ```.png```, ```.svg```) and the ```BT.py``` file. The BT (string form) will be printed in the terminal
 
-## Detailed task description
-Each episode will run for 200 steps, with the tree being ticked 200 times. New objects will spawn on the heavy and light conveyors each step with a probability 6% of a heavy object spawning any given time step, and 12% for a light object being spawned. Each conveyor holds a maximum of 10 objects before being full. Moreover, the robot can only carry a maximum weight of 10. Heavy objects weigh 4 and light objects weight 2. The robot moves at a speed of 5. The battery has a maximum capacity of 100 and depletes with 1 for every action taken, plus 1 every time step regardless of whether an action was taken or not. The tree will always be ticked 200 times regardless of whether the root node returns SUCCESS, FAILURE or RUNNING at any time.  
-After the episode you will be given a reward based on performance. For every heavy object delivered to the delivery table, 2 points are awarded. For every light object you will get 1 point. If at any given time step a conveyor is full when an object would otherwise have spawned, the rest of the factory is kept waiting and you receive a penalty of -0.5 points for blocked heavy objects and -0.25 points for blocked light objects. Finally we will remove 0.2 points for every node in the behavior tree so smaller trees are better.
+4. To One-Hot-Encoding the executed traces and thus creating the input for RE:BT-Espresso copy paste in the terminal:
+      ```python hotencode.py ```
+_Expected output_: ```ExecutedTracesOneHot.csv ```
 
-### Example
-You delivered 1 heavy object and 3 light objects, but you were to slow so 2 heavy objects were blocked and 10 light objects. Your tree consists of 25 nodes. The total fitness becomes:
-2 * 1 + 1 * 3 – 0.5 * 2 – 0.25 * 10 – 0.2 * 25 = -3.5
+5. To run RE:BT-Espresso copy paste in the terminal:
+      ```python RE-BT-Espresso.py```
+  Note that we already provide the pruning values (line 578 of ```RE-BT-Espresso.py```) generated by using the minimal cost-complexity pruning (Wathieu et all. 2022). If you want to run with different pruning values comment line line 578 of ```RE-BT-Espresso.py```
 
+      _Expected output_: REBTEspresso folder in the top level directory with 3 ```behavior_tree``` files (```.dot```, ```.png```, ```.svg```), and 3 ```python``` files (```BT.py```, ```alpha.py```, ```possible_to_improve.py```). The BTs (string form) will be printed in the terminal
 
-## Submitting your behavior tree and getting a score.
-You may work in groups of at most two members. Send an e-mail to jstyrud@kth.se and write your group name in the subject. Also put the names of all members of your group in the e-mail. The deadline is 08.00 on Friday morning the 27th. Your behavior tree will be run on 100 episodes with different random seeds and your fitness is the average of those 100 episodes (tree size penalty is given every episode). We will then put your fitness up for everyone to see on this [document](https://docs.google.com/spreadsheets/d/1QsGNwj7DgN3P_k7Fnsj1gEzuOy0UmRV8gDhnfegFgFY/edit?usp=sharing), so that you can see how your solution compares to others.
-You only get to submit once per group, so make it count! You will of course be able to test run a lot of different seeds by yourselves to make it robust, but we will not be giving any information on which seeds are run by us.
+6. To run 200 simulations, copy paste in the terminal
+      ```python run_experiments.py```
+_Expected output:_ ```performance-correctness.csv``` in the \results directory
 
-## Available behaviors
-Only a specified set of behaviors can be used as listed below.
-### Control nodes
-#### ‘f(’
-Fallback node without memory. All subsequent nodes up to an ending ‘)’ are part of the subtree.
-#### ‘fm(’
-Fallback node with memory. All subsequent nodes up to an ending ‘)’ are part of the subtree.
-#### ‘s(’
-Sequence node without memory. All subsequent nodes up to an ending ‘)’ are part of the subtree.
-#### ‘sm(’
-Sequence node with memory. All subsequent nodes up to an ending ‘)’ are part of the subtree.
+7. To compute the results copy paste in the terminal:
+      ```python evaluation.py ```
+_Expected output_: results printed in the terminal
 
-### Condition nodes
-#### ‘at station \<STATION>?’
-Checks if robot is currently at \<STATION>. \<STATION> can be any of the following five: CHARGE1, CHARGE2, CONVEYOR_HEAVY, CONVEYOR_LIGHT, DELIVERY.
-
-Returns SUCCESS if robot is at the station, FAILURE otherwise.
-
-#### ‘battery level \<value>?’
-Checks if battery level is currently above or below the given value. Example ‘battery level > 4’ returns SUCCESS if battery level is above 4, FAILURE otherwise while ‘battery level < 4’ returns SUCCESS if battery level is below 4, FAILURE otherwise.
-
-#### ‘carried weight \<value>?’
-Checks if the robots currently carried weight is above or below the given value. Works like the battery level behavior.
-
-#### ‘carried light \<value>?’
-Checks if the number of currently carried light objects is above or below the given value. Works like the battery level behavior.
-
-#### ‘carried heavy \<value>?’
-Checks if the number currently carried heavy objects is above or below the given value. Works like the battery level behavior.
-
-#### ‘conveyor light \<value>?’
-Checks if the number of objects currently on the light conveyor is above or below the given value. Works like the battery level behavior.
-
-#### ‘conveyor heavy \<value>?’
-Checks if the number of objects currently on the heavy conveyor is above or below the given value. Works like the battery level behavior.
-
-### Action nodes
-#### ‘idle!’
-Does nothing. Always returns RUNNING.
-
-#### ‘charge!’
-If the robot is at any of the charging stations it will charge, adding 10 to the current battery level and returning RUNNING. If it’s not at a charging station it will return FAILURE. IF battery is fully charged it returns SUCCESS.
-
-#### ‘pick!’
-If the robot is at any of the conveyors, and there is an object there that the robot can carry without exceeding the weight limit it will pick it up and return RUNNING for one step, otherwise returns FAILURE. Only picks one object per time step.
-
-#### ‘place!’
-If the robot is at the delivery table it will place all objects on the delivery table and return RUNNING for one time step, otherwise returns FAILURE. Places all currently held objects in one time step. Returns SUCCESS regardless of whether any objects are actually carried and then placed.
-
-#### ‘move to \<STATION>!’
-Move towards the given station with a maximum speed of 5. Only moves in either x or y direction any given time step. A movement of 1 in x and 1 in y will therefore take 2 timesteps even if total distance is less than 5. \<STATION> can be any of the following five: CHARGE1, CHARGE2, CONVEYOR_HEAVY, CONVEYOR_LIGHT, DELIVERY.
-If the robot is already at the station it will return SUCCESS.
-
-
-
-
-
-
+8. To compute the GED results presented in Table 4 copy paste in the terminal:
+      ```python GED-Calculation.py ```
+_Expected output_: ```GED.txt `` in the \results directory

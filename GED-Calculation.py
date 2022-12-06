@@ -122,9 +122,9 @@ def get_freq_unique_node_dict(graph):
     return freq_dict
 
 path_to_tree_dot_file_input =  "BT-input/behavior_tree.dot"
-path_to_tree_dot_file_bt_factor =  "BT-Factor/behavior_tree.dot"
-path_to_tree_dot_file_re_bt =  "BT-RE-Espresso/behavior_tree.dot"
-path_to_tree_dot_file_bt_factor_dnf =  "BT-Factor-DNF/behavior_tree.dot"
+path_to_tree_dot_file_bt_factor =  "BTFactor/behavior_tree.dot"
+path_to_tree_dot_file_re_bt =  "REBTEspresso/behavior_tree.dot"
+path_to_tree_dot_file_bt_factor_dnf =  "BTFactor_DNF/behavior_tree.dot"
 
 G_input = nx.nx_pydot.from_pydot(
         pydot.graph_from_dot_file(path_to_tree_dot_file_input)[0])
@@ -138,7 +138,7 @@ G_bt_factor_dnf = nx.nx_pydot.from_pydot(
 print("Starting..")
 properties_input_graph = get_freq_unique_node_dict(G_input)
 
-print("Runnin BT factor")
+print("Running BT factor")
 properties_G_bt_factor = get_freq_unique_node_dict(G_bt_factor)
 final_score_bt_factor = find_graph_sim(G_bt_factor,G_input)
 
@@ -146,7 +146,7 @@ properties_G_bt_factor_dnf = get_freq_unique_node_dict(G_bt_factor_dnf)
 final_score_bt_factor_dnf = find_graph_sim(G_bt_factor_dnf,G_input)
 
 
-print("Runnin RE BT")
+print("Running RE BT")
 properties_G_re_bt=get_freq_unique_node_dict(G_re_bt)
 final_score_re_bt = find_graph_sim(G_re_bt,G_input)
 

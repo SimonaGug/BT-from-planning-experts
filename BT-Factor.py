@@ -1,5 +1,5 @@
 import numpy as np
-import sympy
+#import sympy
 from sympy import*
 from pyeda.inter import *
 import re
@@ -21,9 +21,11 @@ defaul_action_and_horn_clauses = True
 #create variables in sympy
 X=50
 V = symbols(f"VAR0:{X}")
-V_dict = {f"VAR{i}": V[i] for i in range(X)}
+V_dict = {f"VAR{i}": 
+    V[i] for i in range(X)}
 v = symbols(f"var0:{X}")
-v_dict = {f"var{i}": v[i] for i in range(X)}
+v_dict = {f"var{i}": 
+    v[i] for i in range(X)}
 v_dict.update(V_dict)
 
 ##################################################################
@@ -259,13 +261,13 @@ def gfactor(f):
         return f   
     q, r = divide(f,d)
     #if q has only one term
-    if q[0] == 1:
-        return f
-    if len(str(q[0])) == 1:
+    if len(str(q[0])) < 8:
         return lf(f, q[0])   
     else:
         q = make_cube_free(q[0])
         d,r =  divide(f,q)
+        if d[0] == 0 :
+            return f
         if cube_free(d[0]):
             if "1" not in q:
                 q = gfactor(q)
@@ -278,17 +280,13 @@ def gfactor(f):
             c = common_cube(d)
             return lf(f,c)
     
-def lf(f, c):
-    #l = best_literal (f,c)  
-    #q, r = divide (f,l)
-    l= str(c).replace("[","").replace("]","")
+def lf(f, l):
+    l= str(l).replace("[","").replace("]","")
     q, r = divide (f,l)
-    #c = common_cube(q)
     q = gfactor(q[0])
     #it should work even without
     if (r != 0):
         r = gfactor(r)
-    #return sympify(l, locals=v_dict)*q + r
     return sympify(l, locals=v_dict)*q + r
 
 def common_cube(f):
@@ -360,24 +358,11 @@ def divisor(f):
     frequencies = dict()
     for i in keys:
         frequencies[i] = frequencies.get(i, 0) + 1
-    most_common_literal = max(frequencies, key=frequencies.get)
-    if frequencies[most_common_literal]>1:
-        return most_common_literal
+    most_common_condition = max(frequencies, key=frequencies.get)
+    if frequencies[most_common_condition]>1:
+        return most_common_condition
     else:
         return "0"
-
-def best_literal(f,c):
-    frequencies = dict()
-    f_str = str(f).replace(" ","").replace("+","*")
-    keys = f_str.split("*")
-    c_var = str(c).split("*") 
-    for i in keys:
-        for j in c_var:
-            if i in j:
-                frequencies[j] = frequencies.get(j, 0) + 1
-    best_literal = str(max(frequencies, key=frequencies.get)).replace("[","").replace("]","")
-    return best_literal
-
 
     
 ###################### build the tree #########
@@ -474,26 +459,26 @@ def main():
         min_rules_alg.append(rule_factor)
 
     bt = min_rules_alg_to_BT(min_rules_alg, actions_in_order)
-    print("\nFINAL BT with my method\n\n", bt)
+    print("\nFINAL BT with BT-Factor and",defaul_action_and_horn_clauses ,"Horn Clauses flag\n\n", bt)
 
 
     #save as a dot file
     bt = bt.replace(' \n', '').replace("[", "").replace(", ]", "").replace("'", "").replace(", ", ",").split(",")
-    print(bt)
+
     if defaul_action_and_horn_clauses:     
-        BT_path = "BT-Factor"
+        BT_path = "BTFactor"
         if not os.path.exists(BT_path):
             os.makedirs(BT_path)
     else:
-        BT_path = "BT-Factor-DNF"
+        BT_path = "BTFactor_DNF"
         if not os.path.exists(BT_path):
             os.makedirs(BT_path)
 
     environment = notebook_interface.Environment(seed=0, verbose=False)
     environment.plot_individual(BT_path, 'behavior_tree', bt)
-    
 
-
+    with open(BT_path + '/BT.py', 'w') as fp:
+        fp.write("bt_factor = " + str(bt))
 
 if __name__ == '__main__':
     main()

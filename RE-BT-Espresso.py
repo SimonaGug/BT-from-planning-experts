@@ -335,13 +335,14 @@ def gfactor(f):
     if d == "0":
         return f   
     q, r = divide(f,d)
-    if q[0] == 1:
-        return f
+
     if len(str(q[0])) == 1:
         return lf(f, q[0])   
     else:
         q = make_cube_free(q[0])
         d,r =  divide(f,q)
+        if d[0] == 0 :
+            return f
         if cube_free(d[0]):
             if "1" not in q:
                 q = gfactor(q)
@@ -354,15 +355,11 @@ def gfactor(f):
             return lf(f,c)
     
 def lf(f, c):
-    #l = best_literal (f,c)  
-    #q, r = divide (f,l)
     l= str(c).replace("[","").replace("]","")
     q, r = divide (f,l)
-    #c = common_cube(q)
     q = gfactor(q[0])
     if (r != 0):
         r = gfactor(r)
-    #return sympify(l, locals=v_dict)*q + r
     return sympify(l, locals=v_dict)*q + r
 
 def common_cube(f):
@@ -434,23 +431,11 @@ def divisor(f):
     frequencies = dict()
     for i in keys:
         frequencies[i] = frequencies.get(i, 0) + 1
-    most_common_literal = max(frequencies, key=frequencies.get)
-    if frequencies[most_common_literal]>1:
-        return most_common_literal
+    most_common_condition = max(frequencies, key=frequencies.get)
+    if frequencies[most_common_condition]>1:
+        return most_common_condition
     else:
         return "0"
-
-def best_literal(f,c):
-    frequencies = dict()
-    f_str = str(f).replace(" ","").replace("+","*")
-    keys = f_str.split("*")
-    c_var = str(c).split("*") 
-    for i in keys:
-        for j in c_var:
-            if i in j:
-                frequencies[j] = frequencies.get(j, 0) + 1
-    best_literal = str(max(frequencies, key=frequencies.get)).replace("[","").replace("]","")
-    return best_literal
 
 #end factorization
 ###################################################
@@ -560,15 +545,15 @@ label_encoding = ['charge!', 'idle!', 'move to CHARGE1!', 'move to CONVEYOR_HEAV
 print("Accuracy:",metrics.accuracy_score(y_test, y_pred))
 
 output_path ="RE-BT-Espresso-dot-files"
-dot_pdf_header = "dot-file"
+#dot_pdf_header = "dot-file"
 
 remove_folder_if_exists(output_path)
 
-PrunePath = add_folder_to_directory(output_path, "")
+#PrunePath = add_folder_to_directory(output_path, "")
 
-dot_pdf_full_path = os.fsdecode(
-            os.path.join(output_path, dot_pdf_header))
-plot_decision_tree(clf, dot_pdf_full_path, X.columns)
+#dot_pdf_full_path = os.fsdecode(
+#            os.path.join(output_path, dot_pdf_header))
+#plot_decision_tree(clf, dot_pdf_full_path, X.columns)
 
 prune_path = clf.cost_complexity_pruning_path(
         X, y)
@@ -589,6 +574,7 @@ BTs_RE_BT_method = []
 alphas = []
 possible_to_improve = []
 
+#comment to obtain different alphas everytime
 ccp_alpha_list_copy = [0.0 , 0.0008702702702702704 , 0.002275761475761476 , 0.0023387234042553198 , 0.00286216824111561 , 0.004518119197364479 , 0.01613263904845741 , 0.017295262636850696 , 0.021831437125748504 , 0.028595685907316433 , 0.04565415414611293 , 0.06448135999711224 , 0.10655000496981389 , 0.11300443126357335 , 0.1220828974320117]
 
 
@@ -611,12 +597,12 @@ for ccp_alpha in ccp_alpha_list_copy:
     clfs.append(clf)
     train_scores.append(score)
 
-    newPrunePath = add_folder_to_directory(
-        "Pruning_{0}_{1:.6g}".format(i, ccp_alpha), output_path)
-    decision_tree_path = os.fsdecode(os.path.join(
-        newPrunePath, "{0}_kFold_{1}_maxDepth_{2}_{3:.6g}_prune".format(k_fold, decision_tree_depth, i, ccp_alpha)))
-    plot_decision_tree(clf, decision_tree_path,
-                        X.columns)
+    #newPrunePath = add_folder_to_directory(
+    #    "Pruning_{0}_{1:.6g}".format(i, ccp_alpha), output_path)
+    #decision_tree_path = os.fsdecode(os.path.join(
+    #    newPrunePath, "{0}_kFold_{1}_maxDepth_{2}_{3:.6g}_prune".format(k_fold, decision_tree_depth, i, ccp_alpha)))
+    #plot_decision_tree(clf, decision_tree_path,
+    #                    X.columns)
 
     decision_tree_obj = clf.tree_
 
@@ -655,25 +641,25 @@ for ccp_alpha in ccp_alpha_list_copy:
         alphas.append(str(ccp_alpha))
         var_cycle_count = 0
 
-with open('RE-BT-Espresso-Output.txt', 'w') as f:
-    f.write("individuals =")
-    f.write((" , ".join(BTs_RE_BT_method)).replace(" \" ", ""))
-    #f.write("\n\n\nindividuals_improved =")
-    #f.write((" , ".join(BTs_RE_BT_plus_factorization)).replace(" \" ", ""))
-    f.write("\n\n\nalphas = [")
-    f.write(" , ".join(alphas) + "]")
-    f.write("\n\n\npossible_to_improve = [")
-    f.write(" , ".join(possible_to_improve) + "]")
-
-
 
 #save as a dot file, not really needed as I have it already in the re-bt-espresso-dot-files folder?
 print(BTs_RE_BT_method[0])
 bt_re_espresso = BTs_RE_BT_method[0].replace(' \n', '').replace("[ ", "").replace(",]", "").replace("'", "").replace(", ", ",").split(",")
 print(bt_re_espresso)
-BT_RE_Espresso_path = "BT-RE-Espresso"
+BT_RE_Espresso_path = "REBTEspresso"
 if not os.path.exists(BT_RE_Espresso_path):
     os.makedirs(BT_RE_Espresso_path)
+
+with open(BT_RE_Espresso_path + '/BT.py', 'w') as fp:
+        fp.write("re_bt_espresso =" + (" , ".join(BTs_RE_BT_method)).replace(" \" ", ""))
+        fp.close()
+with open(BT_RE_Espresso_path + '/alpha.py', 'w') as fp:
+        fp.write("alphas = [" + " , ".join(alphas) + "]")
+        fp.close()
+with open(BT_RE_Espresso_path + '/possible_to_improve.py', 'w') as fp:
+        fp.write("possible_to_improve = [" + " , ".join(possible_to_improve) + "]")
+        fp.close()
+
 
 environment = notebook_interface.Environment(seed=0, verbose=False)
 environment.plot_individual(BT_RE_Espresso_path, 'behavior_tree', bt_re_espresso)
