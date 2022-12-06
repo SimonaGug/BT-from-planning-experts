@@ -156,5 +156,14 @@ main.py
 *.coverage
 *.pyperf
 *.mp4
+*.txt
 __pycache__
 TestResults
+
+#created folders
+*results/
+*RE-BT-Espresso-dot-files/
+*NoisyTraces2/
+*NoisyTraces/
+*BTFactor/Noise/
+*BTFactor/Noise2/

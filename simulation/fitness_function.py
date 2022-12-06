@@ -29,15 +29,21 @@ def compute_fitness(world_interface, behavior_tree, ticks, coeff=None, verbose=F
     depth = behavior_tree.depth
     length = behavior_tree.length
 
-    fitness = coeff.length * length + \
-              coeff.depth * depth + \
-              coeff.ticks * ticks
+    #fitness = coeff.length * length + \
+    #          coeff.depth * depth + \
+    #          coeff.ticks * ticks
+    
+    fitness = coeff.ticks * ticks
+
     if verbose:
         print("Fitness from length, depth, ticks:", fitness)
 
     fitness += coeff.delivered_heavy * world_interface.state.delivered_heavy
     fitness += coeff.delivered_light * world_interface.state.delivered_light
     if verbose:
+        print("world_interface" , world_interface.state)
+        print("Delivered Heavy" , world_interface.state.delivered_heavy)
+        print("Delivered Light" , world_interface.state.delivered_light)
         print("Fitness after deliveries:", fitness)
 
     fitness += coeff.blocked_heavy * world_interface.state.blocked_heavy
@@ -54,5 +60,7 @@ def compute_fitness(world_interface, behavior_tree, ticks, coeff=None, verbose=F
         if verbose:
             print("Timed out: ", fitness)
 
-    fitness = round(fitness, 10) #Just to ensure that binary approximation doesn't affect fitness ranking
-    return fitness
+    bettery_is_zero = False
+    if world_interface.state.battery_level == 0 and (world_interface.state.robot_pos.x != 23.0 or world_interface.state.robot_pos.y !=12.0):
+        bettery_is_zero = True
+    return fitness, int(world_interface.state.delivered_heavy), int(world_interface.state.delivered_light), bettery_is_zero, 

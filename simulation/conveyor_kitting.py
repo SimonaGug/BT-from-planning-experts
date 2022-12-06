@@ -47,6 +47,7 @@ class Stations(IntEnum):
     CONVEYOR_HEAVY = 2
     CONVEYOR_LIGHT = 3
     DELIVERY = 4
+    OTHER = 5
 
 def get_station_from_string(string):
     """ Returns station index from string """
@@ -60,16 +61,17 @@ def get_station_from_string(string):
         return Stations.CONVEYOR_LIGHT
     if 'DELIVERY' in string:
         return Stations.DELIVERY
-
+    if 'OTHER' in string:
+        return Stations.OTHER
     return -1
 
 def get_pos(station):
     """
     Returns pose of given station
     """
-    if station == Stations.CHARGE1:
-        return Pos(2, 7.5)
     if station == Stations.CHARGE2:
+        return Pos(2, 7.5)
+    if station == Stations.CHARGE1:
         return Pos(23, 12)
     if station == Stations.CONVEYOR_HEAVY:
         return Pos(12, 12)
@@ -77,7 +79,6 @@ def get_pos(station):
         return Pos(12, 3)
     if station == Stations.DELIVERY:
         return Pos(21, 7.5)
-    print("ERROR, invalid station")
     return Pos(0, 0)
 
 def move_towards(station, state):
@@ -171,7 +172,32 @@ class Simulation:
 
     def at_station(self, station):
         """ Checks if robot is currently at given station """
+        if station==Stations.OTHER:
+            if self.state.robot_pos != get_pos(Stations.CHARGE1) and self.state.robot_pos != get_pos(Stations.CHARGE2) and self.state.robot_pos != get_pos(Stations.CONVEYOR_HEAVY) and self.state.robot_pos != get_pos(Stations.CONVEYOR_LIGHT) and self.state.robot_pos != get_pos(Stations.DELIVERY):
+                return True
         return self.state.robot_pos == get_pos(station)
+    
+    def not_at_station(self, station):
+        """ Checks if robot is currently NOT at given station """
+        if station==Stations.OTHER:
+            if self.state.robot_pos == get_pos(Stations.CHARGE1) or self.state.robot_pos == get_pos(Stations.CHARGE2) or self.state.robot_pos == get_pos(Stations.CONVEYOR_HEAVY) or self.state.robot_pos == get_pos(Stations.CONVEYOR_LIGHT) or self.state.robot_pos == get_pos(Stations.DELIVERY):
+                return True
+        if station==Stations.CHARGE1:
+            if self.state.robot_pos != get_pos(station):
+                return True
+        if station==Stations.CHARGE2:
+            if self.state.robot_pos != get_pos(station):
+                return True
+        if station==Stations.CONVEYOR_HEAVY:
+            if self.state.robot_pos != get_pos(station):
+                return True
+        if station==Stations.CONVEYOR_LIGHT:
+            if self.state.robot_pos != get_pos(station):
+                return True
+        if station==Stations.DELIVERY:
+            if self.state.robot_pos != get_pos(station):
+                return True
+        return False
 
     def idle(self):
         """

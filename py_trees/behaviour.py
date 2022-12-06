@@ -232,12 +232,15 @@ class Behaviour(object):
                 node.setup()
         self.setup()
 
-    def tick_once(self):
+    def tick_once(self, file_name_string: str=None):
         """
         A direct means of calling tick on this object without
         using the generator mechanism.
         """
         # no logger necessary here...it directly relays to tick
+        if file_name_string is not None:
+            global file_name
+            file_name = file_name_string
         for unused in self.tick():
             pass
 
@@ -277,6 +280,9 @@ class Behaviour(object):
             new_status = common.Status.INVALID
         if new_status != common.Status.RUNNING:
             self.stop(new_status)
+        else:
+            text_file= open(file_name,"a")
+            text_file.write(str(self.name) + "\n\n")
         self.status = new_status
         yield self
 
