@@ -1,6 +1,6 @@
 # Learning Behavior Trees from Planning Experts Using Data Mining and Logic Factorization
 
-This README will guide you to generate the results presented in the paper _Learning Behavior Trees from Planning Experts Using Data Mining and Logic Factorization_ submitted at AAAI23. This repository is the so called SETUPI in the paper
+This README will guide you to generate the results presented in the paper _Learning Behavior Trees from Planning Experts Using Decision Tree and Logic Factorization_. This repository is the so called SETUPI in the paper.
 ## Install
 1. Install python3.8 and R
 2. Install [GraphViz](https://graphviz.org/download/) 
